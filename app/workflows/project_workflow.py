@@ -21,12 +21,14 @@ def analyze_project(metadata: dict):
 
 
 @task
-def save_to_minio(project_id: int, analysis: str):
+def save_to_minio(project_id: int, analysis: str, status: str = "success", error: str | None = None):
     """Persist analysis results as JSON in MinIO."""
     result = {
         "project_id": project_id,
         "analysis": analysis,
-        "timestamp": datetime.utcnow().isoformat()
+        "status": status,
+        "error": error,
+        "timestamp": datetime.utcnow().isoformat(),
     }
     content = json.dumps(result).encode("utf-8")
 

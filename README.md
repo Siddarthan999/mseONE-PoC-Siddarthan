@@ -31,22 +31,25 @@ MinIO console accessible at http://127.0.0.1:9001
 
 # GraphQL Commands
 1. 
-`query {
+```
+query {
   projects(limit: 5) {
     id
     name
     owner
     createdAt
   }
-}`
+}
+```
 
 2.
-`mutation {
+```
+mutation {
   startWorkflow(projectId: 1)
-}`
-
+}
+```
 3.
-`
+```
 query {
   workflowResults(projectId: 1) {
     projectId
@@ -54,4 +57,16 @@ query {
     timestamp
   }
 }
-`
+```
+4.
+```
+query {
+  workflowResults(projectId: 1) {
+    projectId
+    analysis
+    status
+    error
+    timestamp
+  }
+}
+```

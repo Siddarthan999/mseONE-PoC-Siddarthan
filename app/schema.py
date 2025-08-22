@@ -1,3 +1,4 @@
+# app/schema.py
 import strawberry
 from typing import List, Optional
 from .resolvers import get_projects, get_workflow_results
@@ -15,6 +16,8 @@ class ProjectType:
 class WorkflowResultType:
     projectId: int
     analysis: str
+    status: Optional[str]
+    error: Optional[str]
     timestamp: str
 
 
@@ -35,6 +38,8 @@ class Query:
             WorkflowResultType(
                 projectId=r["project_id"],
                 analysis=r["analysis"],
+                status=r.get("status"),
+                error=r.get("error"),
                 timestamp=r["timestamp"],
             )
             for r in raw_results
