@@ -3,39 +3,34 @@ import io
 import time
 import json
 from datetime import datetime
-from prefect import flow, task
-from app.storage.minio_client import minio_client, BUCKET_NAME
-
+from prefect import flow, task, get_run_logger
+from storage.minio_client import minio_client, BUCKET_NAME
 
 @task
 def fetch_project_metadata(project_id: int):
-    """Simulate fetching metadata for a project."""
+    logger = get_run_logger()
+    logger.info(f"Fetching metadata for project {project_id}")
     return {"id": project_id, "name": f"Project-{project_id}"}
-
 
 @task
 def analyze_project(metadata: dict):
-    """Simulate heavy analysis logic for a project."""
-    time.sleep(2)  # simulate computation
+    logger = get_run_logger()
+    logger.info(f"Analyzing project {metadata['name']}...")
+    time.sleep(2)
     return f"Project {metadata['name']} analyzed successfully!"
 
-
 @task
-def save_to_minio(project_id: int, analysis: str, status: str = "success", error: str | None = None):
-    """Persist analysis results as JSON in MinIO."""
+def save_to_minio(project_id: int, analysis: str):
     result = {
         "project_id": project_id,
         "analysis": analysis,
-        "status": status,
-        "error": error,
-        "timestamp": datetime.utcnow().isoformat(),
+        "status": "completed",
+        "error": None,
+        "timestamp": datetime.utcnow().isoformat()
     }
     content = json.dumps(result).encode("utf-8")
 
-    # File path inside bucket
     file_name = f"results/project-{project_id}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}.json"
-
-    # Upload JSON to MinIO
     minio_client.put_object(
         BUCKET_NAME,
         file_name,
@@ -43,17 +38,22 @@ def save_to_minio(project_id: int, analysis: str, status: str = "success", error
         length=len(content),
         content_type="application/json",
     )
+
     return file_name
 
-
 @flow(name="project-analysis-flow")
-def project_analysis_flow(project_id: int):
-    """Full Prefect flow to analyze a project and persist results to MinIO."""
+def project_analysis_flow(project_id: int = 1):
     metadata = fetch_project_metadata(project_id)
     analysis = analyze_project(metadata)
     file_path = save_to_minio(project_id, analysis)
+    return {"analysis": analysis, "file": file_path}
 
-    return {
-        "analysis": analysis,
-        "file": file_path
-    }
+if __name__ == "__main__":
+    from prefect.deployments import Deployment
+
+    # Create a deployment for our flow
+    deployment = Deployment.build_from_flow(
+        flow=project_analysis_flow,
+        name="project-analysis-deployment"
+    )
+    deployment.apply()

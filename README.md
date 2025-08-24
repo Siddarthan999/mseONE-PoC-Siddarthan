@@ -18,6 +18,19 @@ OR
 3. `docker compose build --no-cache`
 4. `docker compose up`
 
+# Get into the api container shell
+1. `docker compose exec api bash`
+2. `python -m app.workflows.project_workflow`
+
+1. `docker compose exec prefect bash`
+2.
+```
+prefect deployment build workflows/project_workflow.py:project_analysis_flow -n "project-analysis" -q "default" --skip-upload
+prefect deployment apply project_analysis_flow-deployment.yaml
+```
+3. `prefect agent start -q default`
+
+
 # PostGres
 1. `docker exec -it poc_postgres psql -U admin -d pocdb`
 2. `INSERT INTO projects (name, owner) VALUES ('POC GraphQL', 'Alice');`
@@ -70,3 +83,52 @@ query {
   }
 }
 ```
+
+# Perfect
+Check out the dashboard at http://127.0.0.1:4200/
+
+# KeyCloak
+http://127.0.0.1:8080/
+1. Log in (admin/admin)
+2. *Realm: mse-one*
+    * *_Client ID:_* poc-cli
+    * *_Username:_* sidd
+    * *_Password:_* siddpass
+3. JWT Token Generation using Invoke-RestMethod (cleaner in PowerShell)
+```
+$headers = @{
+  "Content-Type" = "application/x-www-form-urlencoded"
+}
+
+$body = @{
+  client_id = "poc-cli"
+  username  = "sidd"
+  password  = "siddpass"
+  grant_type = "password"
+}
+
+$response = Invoke-RestMethod -Uri "http://localhost:8080/realms/mse-one/protocol/openid-connect/token" -Method Post -Headers $headers -Body $body
+$response.access_token
+```
+# In PostMan
+1. Headers
+ * Content-Type = application/json
+ * Authorization = Bearer eyJhb....
+2.
+Body -> Raw (JSON)
+```
+{
+  "query": "{ whoami { sub username email roles } }"
+}
+{
+  "query": "{ projects { id name owner createdAt } }"
+}
+{
+  "query": "{ workflowResults(projectId: 1) { projectId analysis status error timestamp } }"
+}
+{
+  "query": "{ startWorkflow(projectId: 1) }"
+}
+```
+
+

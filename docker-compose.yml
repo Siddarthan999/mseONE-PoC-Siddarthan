@@ -39,6 +39,30 @@ services:
     ports:
       - "8000:8000"
 
+  prefect:
+    image: prefecthq/prefect:2-latest
+    command: bash -c "pip install -r /app/requirements.txt && prefect server start --host 0.0.0.0"
+    working_dir: /app
+    environment:
+      - PYTHONPATH=/app
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./app:/app
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.3
+    command: start-dev
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HEALTH_ENABLED=true
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+
 volumes:
   postgres_data:
   minio_data:
+  keycloak_data:
