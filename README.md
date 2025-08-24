@@ -84,7 +84,7 @@ query {
 }
 ```
 
-# Perfect
+# Prefect
 Check out the dashboard at http://127.0.0.1:4200/
 
 # KeyCloak
@@ -124,10 +124,10 @@ Body -> Raw (JSON)
   "query": "{ projects { id name owner createdAt } }"
 }
 {
-  "query": "{ workflowResults(projectId: 1) { projectId analysis status error timestamp } }"
+  "query": "{ workflow_results(projectId: 1) { projectId analysis status error timestamp } }"
 }
 {
-  "query": "{ startWorkflow(projectId: 1) }"
+  "query": "{ start_workflow(project_id: 1) }"
 }
 ```
 
