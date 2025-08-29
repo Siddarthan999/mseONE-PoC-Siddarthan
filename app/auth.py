@@ -66,8 +66,14 @@ async def auth_context(request: Request):
     """
     Strawberry context getter.
     - Validates Bearer token (unless REQUIRE_AUTH=false)
+    - Allows unauthenticated access for GraphQL Playground UI (Accept: text/html)
     - Returns {'claims': ..., 'user': {...}}
     """
+
+    # ✅ Allow the GraphQL Playground (browser UI) without token
+    if "text/html" in request.headers.get("accept", ""):
+        return {"claims": {}, "user": None}
+
     auth = request.headers.get("authorization") or request.headers.get("Authorization")
     if not auth:
         if not REQUIRE_AUTH:

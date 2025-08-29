@@ -234,6 +234,17 @@ prefect deployment apply project_analysis_flow-deployment.yaml
 1. `docker exec -it poc_postgres psql -U admin -d pocdb`
 2. `INSERT INTO projects (name, owner) VALUES ('POC GraphQL', 'Alice');`
 3. `INSERT INTO projects (name, owner) VALUES ('Workflow Automation', 'Bob');`
+### Commands
+1. List all tables:
+
+    `\dt`
+2. Describe a table schema (columns, types, etc.):
+
+    `\d projects`
+3. Show table contents:
+    
+    `SELECT * FROM projects;`
+    
 
 # GraphQL
 GraphQL API accessible at http://127.0.0.1:8000/graphql
